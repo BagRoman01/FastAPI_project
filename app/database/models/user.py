@@ -8,4 +8,4 @@ class User(Base):
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     age: Mapped[int] = mapped_column(BigInteger, nullable=False)
     username: Mapped[str]
-    hashed_password: Mapped[bytes]
+    hashed_password: Mapped[str]
