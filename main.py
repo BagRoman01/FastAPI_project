@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 import uvicorn
-from app.api.endpoints.users import auth_router
+from app.api.endpoints.auth_router import auth_router
 
 app = FastAPI()
 

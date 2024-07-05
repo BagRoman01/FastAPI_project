@@ -9,3 +9,7 @@ class User(Base):
     age: Mapped[int] = mapped_column(BigInteger, nullable=False)
     username: Mapped[str]
     hashed_password: Mapped[str]
+
+    @staticmethod
+    def get_primary_key():
+        return User.id

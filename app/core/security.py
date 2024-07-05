@@ -4,8 +4,7 @@ import jwt
 from jose import JWTError
 from passlib.context import CryptContext
 from app.core.config import settings
-from fastapi import HTTPException, Depends
-from starlette import status
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Response, Request
 from app.utils.exceptions import InvalidTokenError, NoInfoTokenError, TokenExpiredError
@@ -60,5 +59,5 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
 
 
 def set_token_to_cookies(response: Response, token: str):
-    response.set_cookie('access_token', token)
+    response.set_cookie('access_token', token, httponly=True)
     return response
