@@ -1,5 +1,4 @@
 from sqlalchemy import select, delete
-
 from app.database.models.sessions import Session
 from repository_base import Repository
 

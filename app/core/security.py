@@ -7,7 +7,7 @@ from app.core.config import settings
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Response, Request
-from app.utils.exceptions import InvalidTokenError, NoInfoTokenError, TokenExpiredError
+from app.api.exceptions import InvalidTokenError, NoInfoTokenError, TokenExpiredError
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

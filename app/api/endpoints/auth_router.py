@@ -1,13 +1,13 @@
 from datetime import timedelta
 from sqlalchemy import select
-from fastapi import APIRouter, status, HTTPException, Response
+from fastapi import APIRouter, Response
 from app.api.schemas.user import UserCreate, UserLogin
 from app.core.security import hash_password, verify_pwd, create_jwt_token, get_current_user, set_token_to_cookies
 from app.database.db import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 from app.database.models.user import User
-from app.utils.exceptions import UserAlreadyExists, RegistrationException, UserNotFoundError, AuthenticationError
+from app.api.exceptions import UserAlreadyExists, UserNotFoundError, AuthenticationError
 
 auth_router = APIRouter(prefix="/auth")
 
