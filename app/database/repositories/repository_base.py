@@ -21,7 +21,7 @@ class Repository(RepositoryBase):
         self.session = session
 
     async def add_one(self, data: dict):
-        query_exec =  await self.session.execute(insert(self.model).values(**data).returning(self.model))
+        query_exec = await self.session.execute(insert(self.model).values(**data).returning(self.model))
         return query_exec.scalar()
 
     async def get_by_id(self, find_id: int) -> model:
