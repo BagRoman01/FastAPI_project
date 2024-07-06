@@ -1,13 +1,17 @@
 import asyncio
 from datetime import timedelta, datetime, timezone
+from secrets import token_hex
 import jwt
 from jose import JWTError
 from passlib.context import CryptContext
+from app.api.schemas.others import Tokens
+from app.api.schemas.session import SessionCreate
+from app.api.schemas.user import UserFromDb
 from app.core.config import settings
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Response, Request
-from app.api.exceptions import InvalidTokenError, NoInfoTokenError, TokenExpiredError
+from app.services.exceptions import InvalidTokenError, NoInfoTokenError, TokenExpiredError
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -36,6 +40,20 @@ def create_jwt_token(data: dict, expires_delta: timedelta = None):
     return encoded_jwt
 
 
+def create_session(user: UserFromDb, fingerprint: str):
+    create_date = datetime.now()
+    refresh_token = token_hex(8)
+
+    session = SessionCreate(
+        refresh_token=refresh_token,
+        fingerprint=fingerprint,
+        user_id=user.id,
+        exp_at=create_date.timestamp() + settings.refresh_exp,
+        created_at=create_date
+    )
+    return session
+
+
 def decode_access_token(token: str):
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
@@ -58,6 +76,11 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     return payload["sub"]
 
 
-def set_token_to_cookies(response: Response, token: str):
-    response.set_cookie('access_token', token, httponly=True)
+def set_tokens_to_cookies(response: Response, tokens: Tokens):
+    response.set_cookie('access_token', tokens.access_token, httponly=True)
+    response.set_cookie('refresh_token', tokens.refresh_token, httponly=True)
     return response
+
+
+def get_fingerprint(request: Request):
+    return str(request.headers.get('user-agent'))

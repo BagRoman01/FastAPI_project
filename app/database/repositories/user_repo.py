@@ -1,6 +1,6 @@
 from sqlalchemy import select
 from app.database.models.user import User
-from repository_base import Repository
+from app.database.repositories.repository_base import Repository
 
 
 class UserRepository(Repository):
@@ -12,3 +12,8 @@ class UserRepository(Repository):
         result = query_exec.scalars().first()
         return result
 
+    async def find_by_id(self, user_id: int) -> model:
+        model = self.model
+        query_exec = await self.session.execute(select(model).where(model.get_primary_key() == user_id))
+        result: model = query_exec.scalars().first()
+        return result

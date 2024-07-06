@@ -15,6 +15,7 @@ class UserLogin(BaseModel):
 
 class UserFromDb(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+    id: int
     username: str
-    age: int
+    hashed_password: str
 

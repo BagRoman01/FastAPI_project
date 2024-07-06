@@ -1,6 +1,6 @@
 from sqlalchemy import select, delete
 from app.database.models.sessions import Session
-from repository_base import Repository
+from app.database.repositories.repository_base import Repository
 
 
 class SessionRepository(Repository):
