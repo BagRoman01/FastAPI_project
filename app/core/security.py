@@ -2,16 +2,19 @@ import asyncio
 from datetime import timedelta, datetime, timezone
 from secrets import token_hex
 import jwt
-from jose import JWTError
 from passlib.context import CryptContext
 from app.api.schemas.others import Tokens
-from app.api.schemas.session import SessionCreate
+from app.api.schemas.session import SessionCreate, Session
 from app.api.schemas.user import UserFromDb
 from app.core.config import settings
-from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import Response, Request
-from app.services.exceptions import InvalidTokenError, NoInfoTokenError, TokenExpiredError
+from app.exceptions.token_exceptions import (InvalidAccessTokenError,
+                                             NoInfoAccessTokenError,
+                                             AccessTokenExpiredError,
+                                             TokensNotFoundError,
+                                             InvalidRefreshTokenError,
+                                             RefreshTokenExpiredError)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -57,24 +60,20 @@ def create_session(user: UserFromDb, fingerprint: str):
 
 def decode_access_token(token: str):
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        payload = jwt.decode(token, key=settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         return payload
-    except JWTError:
-        raise InvalidTokenError()
+    except jwt.ExpiredSignatureError:
+        raise AccessTokenExpiredError()
+
+    except jwt.InvalidTokenError:
+        raise InvalidAccessTokenError()
 
 
-def get_token_from_cookie(request: Request):
-    return request.cookies.get("access-token")
-
-
-def get_current_user(token: str = Depends(oauth2_scheme)):
-    if not token:
-        raise TokenExpiredError()
-
+def get_current_user(token: str):
     payload = decode_access_token(token)
-    if "sub" not in payload:
-        raise NoInfoTokenError()
-    return payload["sub"]
+    if "username" not in payload:
+        raise NoInfoAccessTokenError()
+    return payload["username"]
 
 
 def set_tokens_to_cookies(response: Response, tokens: Tokens):
@@ -85,3 +84,29 @@ def set_tokens_to_cookies(response: Response, tokens: Tokens):
 
 def get_fingerprint(request: Request):
     return str(request.headers.get('user-agent'))
+
+
+def get_tokens_from_cookie(request: Request):
+    access_token = request.cookies.get('access_token')
+    refresh_token = request.cookies.get('refresh_token')
+    if refresh_token:
+        return Tokens(access_token=access_token, refresh_token=refresh_token)
+    else:
+        raise TokensNotFoundError
+
+
+def check_session(session: Session, fingerprint: str):
+    if not session:
+        raise InvalidRefreshTokenError
+
+    if session.fingerprint != fingerprint:
+        raise InvalidRefreshTokenError
+
+    print(datetime.now(timezone.utc))
+    print(session.exp_at)
+    print(session.exp_at >= datetime.now(timezone.utc))
+    if session.exp_at <= datetime.now(timezone.utc):
+        raise RefreshTokenExpiredError
+
+    return session.user_id
+

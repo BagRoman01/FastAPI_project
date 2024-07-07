@@ -1,11 +1,10 @@
 from app.api.schemas.others import Tokens
 from app.api.schemas.user import UserCreate, UserFromDb, UserLogin
-from app.core.security import hash_password, verify_pwd, create_jwt_token, create_session, set_tokens_to_cookies, \
-    get_fingerprint
-from app.services.exceptions import UserAlreadyExists, UserNotFoundError, AuthenticationError
+from app.core.security import hash_password, verify_pwd, create_jwt_token, create_session, set_tokens_to_cookies
+from app.exceptions.auth_exceptions import UserAlreadyExistsError, UserNotFoundError, AuthenticationError
 from app.services.sessions_service import SessionsService
-from app.utils.uow import IUnitOfWork, UnitOfWork
-from fastapi import Response, Depends
+from app.utils.uow import IUnitOfWork
+from fastapi import Response
 
 
 class UsersService:
@@ -16,7 +15,7 @@ class UsersService:
         async with self.uow:
             existing_user = await self.uow.user_repos.find_by_username(user.username)
             if existing_user:
-                raise UserAlreadyExists(username=existing_user.username)
+                raise UserAlreadyExistsError(username=existing_user.username)
             hashed_pwd = await hash_password(user.password)
             user_dict = user.model_dump()
             user_dict["hashed_password"] = hashed_pwd
@@ -30,7 +29,7 @@ class UsersService:
         async with self.uow:
             if user_id and username:
                 raise ValueError("Both user_id and username cannot be specified simultaneously.")
-            user = None
+
             if user_id:
                 user = await self.uow.user_repos.find_by_id(user_id)
             elif username:
@@ -39,7 +38,8 @@ class UsersService:
             if not user:
                 raise UserNotFoundError
 
-            return user
+            user_from_db = UserFromDb(id=user.id, username=user.username, hashed_password=user.hashed_password)
+            return user_from_db
 
     async def authenticate_user(self, user: UserLogin, response: Response, fingerprint: str):
         async with self.uow:
@@ -51,12 +51,12 @@ class UsersService:
             if not verify_pwd(user.password, user_from_db.hashed_password):
                 raise AuthenticationError
 
-            access_token = create_jwt_token({"username": user.username})
+            access_token = create_jwt_token(data={"username": user.username})
             new_session = create_session(user_from_db, fingerprint)
 
             session_service = SessionsService(self.uow)
             added_session = await session_service.add_session(new_session)
 
-            set_tokens_to_cookies(response, Tokens(access_token=access_token, refresh_token=added_session.refresh_token))
-
-            return {'access_token': access_token}
+            set_tokens_to_cookies(response, Tokens(access_token=access_token,
+                                                   refresh_token=added_session.refresh_token))
+            return {'access-token': access_token, "token-type": "Bearer"}
