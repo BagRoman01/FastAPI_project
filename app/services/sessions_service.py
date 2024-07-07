@@ -27,6 +27,6 @@ class SessionsService:
             result = Session.model_validate(query_exec)
 
             await self.uow.commit()
-            print(f"Session {result.session_id} created")
+            print(f"Session {result.id} created")
             return result
 

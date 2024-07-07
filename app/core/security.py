@@ -42,13 +42,14 @@ def create_jwt_token(data: dict, expires_delta: timedelta = None):
 
 def create_session(user: UserFromDb, fingerprint: str):
     create_date = datetime.now()
+
     refresh_token = token_hex(8)
 
     session = SessionCreate(
         refresh_token=refresh_token,
         fingerprint=fingerprint,
         user_id=user.id,
-        exp_at=create_date.timestamp() + settings.refresh_exp,
+        exp_at=create_date + timedelta(minutes=settings.REFRESH_TOKEN_EXPIRE_MINUTES),
         created_at=create_date
     )
     return session

@@ -30,7 +30,7 @@ class UsersService:
         async with self.uow:
             if user_id and username:
                 raise ValueError("Both user_id and username cannot be specified simultaneously.")
-
+            user = None
             if user_id:
                 user = await self.uow.user_repos.find_by_id(user_id)
             elif username:
@@ -41,28 +41,22 @@ class UsersService:
 
             return user
 
-    # async def authenticate_user(self, user: UserLogin, response: Response,
-    #                             fingerprint: str = Depends(get_fingerprint),
-    #                             unit_of_work: IUnitOfWork = Depends(UnitOfWork)):
-    #     async with unit_of_work as session:
-    #         # Use the session provided by the UnitOfWork
-    #         user_from_db = await self.get_user_from_db(username=user.username, unit_of_work=session)
-    #
-    #         if not user_from_db:
-    #             raise UserNotFoundError
-    #
-    #         if not verify_pwd(user.password, user_from_db.hashed_password):
-    #             raise AuthenticationError
-    #
-    #         access_token = create_jwt_token({"username": user.username})
-    #         new_session = create_session(user_from_db, fingerprint)
-    #
-    #         # Use session context to interact with SessionsService
-    #         session_service = SessionsService(session)
-    #         added_session = await session_service.add_session(new_session)
-    #
-    #         # Now, set tokens to cookies using the response object
-    #         set_tokens_to_cookies(response, Tokens(access_token=access_token,
-    #                                                refresh_token=added_session.refresh_token))
-    #
-    #         return {'access_token': access_token}
+    async def authenticate_user(self, user: UserLogin, response: Response, fingerprint: str):
+        async with self.uow:
+            user_from_db = await self.uow.user_repos.find_by_username(username=user.username)
+
+            if not user_from_db:
+                raise UserNotFoundError
+
+            if not verify_pwd(user.password, user_from_db.hashed_password):
+                raise AuthenticationError
+
+            access_token = create_jwt_token({"username": user.username})
+            new_session = create_session(user_from_db, fingerprint)
+
+            session_service = SessionsService(self.uow)
+            added_session = await session_service.add_session(new_session)
+
+            set_tokens_to_cookies(response, Tokens(access_token=access_token, refresh_token=added_session.refresh_token))
+
+            return {'access_token': access_token}
