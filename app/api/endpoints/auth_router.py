@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Response, Depends
+from fastapi import APIRouter, Response, Request
 from app.api.schemas.others import Tokens
 from app.api.schemas.user import UserCreate, UserLogin
 from app.core.security import get_current_user, check_session, create_jwt_token, create_session, set_tokens_to_cookies, \
-    oauth2_scheme
+    get_tokens_from_cookie
 from app.api.dependencies import users_service_dep, fingerprint_dep, sessions_service_dep, tokens_dep
 from app.exceptions.token_exceptions import AccessTokenExpiredError
 
@@ -45,12 +45,14 @@ async def update_tokens(response: Response, tokens: tokens_dep,
 @auth_router.get("/authorize")
 async def authorize(response: Response, tokens: tokens_dep,
                     sessions_service: sessions_service_dep, users_service: users_service_dep,
-                    fingerprint: fingerprint_dep, token: str = Depends(oauth2_scheme)):
+                    fingerprint: fingerprint_dep):
     try:
-        current_user: str = get_current_user(token)
+        current_user: str = get_current_user(tokens.access_token)
         return {"message": f"{current_user} has been authorized."}
     except AccessTokenExpiredError:
         await update_tokens(response, tokens, sessions_service, users_service, fingerprint)
-        current_user: str = get_current_user(token)
+        # здесь должен быть новый токен доступа! а идет сюда старый
+        set_tokens_to_cookies(response, tokens)
+        current_user: str = get_current_user(tokens.access_token)
     return current_user
 

@@ -18,8 +18,6 @@ from app.exceptions.token_exceptions import (InvalidAccessTokenError,
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login/")
-
 
 async def hash_password(password: str) -> str:
     return await asyncio.to_thread(pwd_context.hash, password)
