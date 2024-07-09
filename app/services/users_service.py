@@ -25,7 +25,11 @@ class UsersService:
             await self.uow.commit()
             return result
 
-    async def get_user_from_db(self, user_id: int = None, username: str = None) -> UserFromDb:
+    async def get_user_from_db(
+            self,
+            user_id: int = None,
+            username: str = None
+    ) -> UserFromDb:
         async with self.uow:
             if user_id and username:
                 raise ValueError("Both user_id and username cannot be specified simultaneously.")
@@ -41,9 +45,14 @@ class UsersService:
             user_from_db = UserFromDb(id=user.id, username=user.username, hashed_password=user.hashed_password)
             return user_from_db
 
-    async def authenticate_user(self, user: UserLogin, response: Response, fingerprint: str):
+    async def authenticate_user(
+            self,
+            user: UserLogin,
+            response: Response,
+            fingerprint: str
+    ):
         async with self.uow:
-            user_from_db = await self.uow.user_repos.find_by_username(username=user.username)
+            user_from_db: UserFromDb = await self.uow.user_repos.find_by_username(username=user.username)
 
             if not user_from_db:
                 raise UserNotFoundError

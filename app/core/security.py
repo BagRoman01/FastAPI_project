@@ -7,14 +7,15 @@ from app.api.schemas.others import Tokens
 from app.api.schemas.session import SessionCreate, Session
 from app.api.schemas.user import UserFromDb
 from app.core.config import settings
-from fastapi.security import OAuth2PasswordBearer
 from fastapi import Response, Request
-from app.exceptions.token_exceptions import (InvalidAccessTokenError,
-                                             NoInfoAccessTokenError,
-                                             AccessTokenExpiredError,
-                                             TokensNotFoundError,
-                                             InvalidRefreshTokenError,
-                                             RefreshTokenExpiredError)
+from app.exceptions.token_exceptions import (
+    InvalidAccessTokenError,
+    NoInfoAccessTokenError,
+    AccessTokenExpiredError,
+    TokensNotFoundError,
+    InvalidRefreshTokenError,
+    RefreshTokenExpiredError
+)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -23,11 +24,17 @@ async def hash_password(password: str) -> str:
     return await asyncio.to_thread(pwd_context.hash, password)
 
 
-def verify_pwd(password: str, hashed_pwd: str) -> bool:
+def verify_pwd(
+        password: str,
+        hashed_pwd: str
+) -> bool:
     return pwd_context.verify(password, hashed_pwd)
 
 
-def create_jwt_token(data: dict, expires_delta: timedelta = None):
+def create_jwt_token(
+        data: dict,
+        expires_delta: timedelta = None
+):
     to_encode = data.copy()
     time_now = datetime.now(timezone.utc)
     expire = time_now + (expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
@@ -41,7 +48,10 @@ def create_jwt_token(data: dict, expires_delta: timedelta = None):
     return encoded_jwt
 
 
-def create_session(user: UserFromDb, fingerprint: str):
+def create_session(
+        user: UserFromDb,
+        fingerprint: str
+):
     create_date = datetime.now()
 
     refresh_token = token_hex(8)
@@ -74,7 +84,10 @@ def get_current_user(token: str):
     return payload["username"]
 
 
-def set_tokens_to_cookies(response: Response, tokens: Tokens):
+def set_tokens_to_cookies(
+        response: Response,
+        tokens: Tokens
+):
     response.set_cookie('access_token', tokens.access_token, httponly=True)
     response.set_cookie('refresh_token', tokens.refresh_token, httponly=True)
     return response
@@ -93,7 +106,10 @@ def get_tokens_from_cookie(request: Request):
         raise TokensNotFoundError
 
 
-def check_session(session: Session, fingerprint: str):
+def check_session(
+        session: Session,
+        fingerprint: str
+):
     if not session:
         raise InvalidRefreshTokenError
 

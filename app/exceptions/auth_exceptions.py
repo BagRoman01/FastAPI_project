@@ -3,21 +3,36 @@ from starlette import status
 
 
 class UserAlreadyExistsError(HTTPException):
-    def __init__(self, username: str, status_code: int = status.HTTP_400_BAD_REQUEST):
+    def __init__(
+            self,
+            username: str,
+            status_code: int = status.HTTP_400_BAD_REQUEST
+    ):
         super().__init__(status_code=status_code, detail=f"User with username '{username}' already exists.")
 
 
 class RegistrationError(HTTPException):
-    def __init__(self, detail: str = "Registration failed. Please try again.",
-                 status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR):
+    def __init__(
+            self,
+            detail: str = "Registration failed. Please try again.",
+            status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR
+    ):
         super().__init__(status_code=status_code, detail=detail)
 
 
 class UserNotFoundError(HTTPException):
-    def __init__(self, detail: str = "User not found!", status_code: int = status.HTTP_404_NOT_FOUND):
+    def __init__(
+            self,
+            detail: str = "User not found!",
+            status_code: int = status.HTTP_404_NOT_FOUND
+    ):
         super().__init__(status_code=status_code, detail=detail)
 
 
 class AuthenticationError(HTTPException):
-    def __init__(self, detail: str = "Login or password is not valid", status_code: int = status.HTTP_403_FORBIDDEN):
+    def __init__(
+            self,
+            detail: str = "Login or password is not valid",
+            status_code: int = status.HTTP_403_FORBIDDEN
+    ):
         super().__init__(status_code=status_code, detail=detail)
