@@ -54,32 +54,3 @@ class UsersService:
 
             user_from_db = UserFromDb(id=user.id, username=user.username, hashed_password=user.hashed_password)
             return user_from_db
-
-    async def authenticate_user(
-            self,
-            user: UserLogin,
-            response: Response,
-            fingerprint: str
-    ):
-        async with self.uow:
-            user_from_db: UserFromDb = await self.uow.user_repos.find_by_username(username=user.username)
-
-            if not user_from_db:
-                raise UserNotFoundError
-
-            if not verify_pwd(user.password, user_from_db.hashed_password):
-                raise AuthenticationError
-
-            access_token = create_jwt_token(data={"username": user.username})
-            new_session = create_session(user_from_db, fingerprint)
-
-            session_service = SessionsService(self.uow)
-
-            # явно выходим из первой сессии и закрываем ее
-            await self.uow.__aexit__(None, None, None)
-
-            added_session = await session_service.add_session(new_session)
-
-            set_tokens_to_cookies(response, Tokens(access_token=access_token,
-                                                   refresh_token=added_session.refresh_token))
-            return {'access-token': access_token, "token-type": "Bearer"}
