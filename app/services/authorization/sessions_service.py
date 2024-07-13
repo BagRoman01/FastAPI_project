@@ -31,3 +31,6 @@ class SessionsService:
             print(f"Session {result.id} created")
             return result
 
+    async def delete_session(self, session_id: int):
+        async with self.uow:
+            return await self.uow.session_repos.delete_by_id(session_id)
