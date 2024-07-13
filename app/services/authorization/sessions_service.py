@@ -7,8 +7,9 @@ class SessionsService:
         self.uow = uow
 
     async def get_all_user_sessions(self, user_id: int) -> list[Session]:
-        query_exec = await self.uow.session_repos.get_sessions_by_user_id(user_id)
-        return [Session.model_validate(session) for session in query_exec]
+        async with self.uow as uow:
+            query_exec = await self.uow.session_repos.get_sessions_by_user_id(user_id)
+            return [Session.model_validate(session) for session in query_exec]
 
     async def get_session_by_refresh_token(self, refresh_token: str) -> Session:
         async with self.uow:

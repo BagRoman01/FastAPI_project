@@ -1,5 +1,5 @@
 import asyncio
-from datetime import timedelta, datetime, timezone
+from datetime import timedelta, datetime, timezone, UTC
 from secrets import token_hex
 import jwt
 from passlib.context import CryptContext
@@ -36,7 +36,7 @@ def create_jwt_token(
         expires_delta: timedelta = None
 ):
     to_encode = data.copy()
-    time_now = datetime.now(timezone.utc)
+    time_now = datetime.now(UTC)
     expire = time_now + (expires_delta or timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
 
@@ -52,7 +52,7 @@ def create_session(
         user: UserFromDb,
         fingerprint: str
 ):
-    create_date = datetime.now()
+    create_date = datetime.now(timezone.utc)
 
     refresh_token = token_hex(8)
 

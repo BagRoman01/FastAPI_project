@@ -1,8 +1,8 @@
 from typing import Annotated
 from app.api.schemas.others import Tokens
 from app.core.security import get_fingerprint, get_tokens_from_cookie
-from app.services.sessions_service import SessionsService
-from app.services.users_service import UsersService
+from app.services.authorization.sessions_service import SessionsService
+from app.services.authorization.users_service import UsersService
 from app.utils.uow import UnitOfWork, IUnitOfWork
 from fastapi import Depends
 

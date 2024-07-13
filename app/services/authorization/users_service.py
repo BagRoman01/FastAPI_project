@@ -1,8 +1,18 @@
 from app.api.schemas.others import Tokens
 from app.api.schemas.user import UserCreate, UserFromDb, UserLogin
-from app.core.security import hash_password, verify_pwd, create_jwt_token, create_session, set_tokens_to_cookies
-from app.exceptions.auth_exceptions import UserAlreadyExistsError, UserNotFoundError, AuthenticationError
-from app.services.sessions_service import SessionsService
+from app.core.security import (
+    hash_password,
+    verify_pwd,
+    create_jwt_token,
+    create_session,
+    set_tokens_to_cookies
+)
+from app.exceptions.auth_exceptions import (
+    UserAlreadyExistsError,
+    UserNotFoundError,
+    AuthenticationError
+)
+from app.services.authorization.sessions_service import SessionsService
 from app.utils.uow import IUnitOfWork
 from fastapi import Response
 
@@ -64,6 +74,10 @@ class UsersService:
             new_session = create_session(user_from_db, fingerprint)
 
             session_service = SessionsService(self.uow)
+
+            # явно выходим из первой сессии и закрываем ее
+            await self.uow.__aexit__(None, None, None)
+
             added_session = await session_service.add_session(new_session)
 
             set_tokens_to_cookies(response, Tokens(access_token=access_token,
