@@ -1,6 +1,6 @@
 from typing import Annotated
 from fastapi import Depends
-from app.api.schemas.others import Tokens
+from app.api.schemas.tokens import Tokens
 from app.api.schemas.user import UserLogin, UserCreate
 from app.core.security import (
     verify_pwd,

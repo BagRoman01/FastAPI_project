@@ -1,20 +1,11 @@
-from app.api.schemas.others import Tokens
-from app.api.schemas.user import UserCreate, UserFromDb, UserLogin
-from app.core.security import (
-    hash_password,
-    verify_pwd,
-    create_jwt_token,
-    create_session,
-    set_tokens_to_cookies
-)
+from app.api.schemas.user import UserCreate, UserFromDb
+from app.core.security import hash_password
+
 from app.exceptions.auth_exceptions import (
     UserAlreadyExistsError,
     UserNotFoundError,
-    AuthenticationError
 )
-from app.services.authorization.sessions_service import SessionsService
 from app.utils.uow import IUnitOfWork
-from fastapi import Response
 
 
 class UsersService:

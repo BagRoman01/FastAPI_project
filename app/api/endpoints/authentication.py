@@ -7,10 +7,10 @@ from app.api.dependencies import (
     tokens_dep
 )
 
-auth_router = APIRouter(prefix="/auth")
+auth = APIRouter(prefix="/auth")
 
 
-@auth_router.post("/register")
+@auth.post("/register")
 async def register_user(
         user: UserCreate,
         service_auth: auth_service_dep
@@ -18,7 +18,7 @@ async def register_user(
     return await service_auth.register_user(user)
 
 
-@auth_router.post("/login")
+@auth.post("/login")
 async def login_user(
         user: UserLogin,
         service_auth: auth_service_dep,
@@ -30,7 +30,7 @@ async def login_user(
                                                 fingerprint=fingerprint)
 
 
-@auth_router.post('/refresh')
+@auth.post('/refresh')
 async def refresh_tokens(
         response: Response,
         tokens: tokens_dep,
@@ -40,7 +40,7 @@ async def refresh_tokens(
     return await service_auth.refresh_tokens(response, tokens, fingerprint)
 
 
-@auth_router.get("/authorize")
+@auth.get("/authorize")
 async def authorize(
         service_auth: auth_service_dep,
         response: Response,

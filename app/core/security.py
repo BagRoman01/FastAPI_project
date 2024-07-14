@@ -3,7 +3,7 @@ from datetime import timedelta, datetime, timezone, UTC
 from secrets import token_hex
 import jwt
 from passlib.context import CryptContext
-from app.api.schemas.others import Tokens
+from app.api.schemas.tokens import Tokens
 from app.api.schemas.session import SessionCreate, Session
 from app.api.schemas.user import UserFromDb
 from app.core.config import settings

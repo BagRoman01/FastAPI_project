@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     REFRESH_TOKEN_EXPIRE_MINUTES: int
+    CURRENCY_API_KEY: str
 
     @property
     def async_db_url(self):

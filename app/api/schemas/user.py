@@ -1,11 +1,17 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+from app.exceptions.auth_exceptions import ShortPasswordError
 
 
-# Pydantic schema for creating a new user
 class UserCreate(BaseModel):
-    age: int
+    age: int = Field(..., gt=0, le=120, description="Age must be between 1 and 120")
     username: str
     password: str
+
+    @field_validator('password')
+    def password_length(cls, value):
+        if len(value) < 5:
+            raise ShortPasswordError
+        return value
 
 
 class UserLogin(BaseModel):

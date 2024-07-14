@@ -20,6 +20,11 @@ class RegistrationError(HTTPException):
         super().__init__(status_code=status_code, detail=detail)
 
 
+class ShortPasswordError(ValueError):
+    def __init__(self, detail: str = "Password must be at least 8 characters long."):
+        super().__init__(detail)
+
+
 class UserNotFoundError(HTTPException):
     def __init__(
             self,
