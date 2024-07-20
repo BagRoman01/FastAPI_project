@@ -25,7 +25,7 @@ class AuthService:
 
     async def register_user(self, user: UserCreate):
         user = await self.user_service.register_user(user)
-        return {"message": f"User {user.username} has been registered!"}
+        return {"username": user.username}
 
     async def authenticate_user(
             self,
