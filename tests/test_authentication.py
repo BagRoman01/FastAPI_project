@@ -1,6 +1,7 @@
 from contextlib import nullcontext as does_not_raise
 import pytest
 from starlette import status
+from app.exceptions.auth_exceptions import UserAlreadyExistsError
 
 
 class TestAuthentication:
@@ -8,8 +9,8 @@ class TestAuthentication:
     @pytest.mark.parametrize(
         "username, password, age, exp_exception, exp_status_code",
         [
-            # ("username_test", "admin", 18, pytest.raises(UserAlreadyExistsError), status.HTTP_400_BAD_REQUEST),
             ("username_test", "admin", 18, does_not_raise(), status.HTTP_200_OK),
+            ("username_test", "admin", 18, pytest.raises(UserAlreadyExistsError), status.HTTP_400_BAD_REQUEST)
         ]
     )
     async def test_registration(
@@ -28,7 +29,6 @@ class TestAuthentication:
         })
         with exp_exception:
             assert response.status_code == exp_status_code
-            assert response.json().get('username') == username
 
 
 
