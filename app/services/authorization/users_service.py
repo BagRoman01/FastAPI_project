@@ -16,7 +16,7 @@ class UsersService:
         async with self.uow:
             existing_user = await self.uow.user_repos.find_by_username(user.username)
             if existing_user:
-                print(f"Raising UserAlreadyExistsError__________________________________________________________")  # Добавьте отладочное сообщение
+                print(f"Raising UserAlreadyExistsError__________________________________________________________")
                 raise UserAlreadyExistsError(username=existing_user.username)
             hashed_pwd = await hash_password(user.password)
             user_dict = user.model_dump()

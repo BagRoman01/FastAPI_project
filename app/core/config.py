@@ -1,8 +1,5 @@
 import secrets
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from dotenv import load_dotenv
-
-load_dotenv()
 
 
 class Settings(BaseSettings):
@@ -17,9 +14,10 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     REFRESH_TOKEN_EXPIRE_MINUTES: int
     CURRENCY_API_KEY: str
+    MODE: str
 
     @property
-    def async_db_url(self):
+    def ASYNC_DATABASE_URL(self):
         return f"postgresql+asyncpg://{self.DB_USER}:{self.DB_PASS}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     def __init__(self):
