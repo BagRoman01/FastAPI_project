@@ -1,5 +1,5 @@
-import asyncio
 import pytest
+import asyncio
 from httpx import AsyncClient
 from sqlalchemy.pool import NullPool
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
@@ -25,8 +25,8 @@ async def setup_database():
         await conn.run_sync(Base.metadata.drop_all)
 
 
-@pytest.fixture(scope='session')
-def event_loop(request):
+@pytest.fixture(scope="session")
+def event_loop():
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()

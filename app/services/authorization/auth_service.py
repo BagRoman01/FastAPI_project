@@ -44,7 +44,7 @@ class AuthService:
 
         set_tokens_to_cookies(response, Tokens(access_token=access_token,
                                                refresh_token=added_session.refresh_token))
-        return {'access-token': access_token}
+        return {'access_token': access_token}
 
     async def refresh_tokens(
             self,
