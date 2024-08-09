@@ -33,7 +33,7 @@ def event_loop():
 
 
 @pytest.fixture(scope="session")
-async def client() -> AsyncGenerator[AsyncClient, None]:
+async def async_client() -> AsyncGenerator[AsyncClient, None]:
     transport = httpx.ASGITransport(app=app, raise_app_exceptions=True)
     async with AsyncClient(transport=transport, base_url="http://127.0.0.1") as async_client:
         yield async_client

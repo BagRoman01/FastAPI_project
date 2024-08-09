@@ -1,10 +1,23 @@
+import asyncio
+import string
+import random
 import pytest
 from starlette import status
 
-# global access_token, refresh_token
-# access_token: str | None = None
-# refresh_token: str | None = None
-#
+
+@pytest.fixture(scope="module")
+def token_storage():
+    return {
+        "access_token": None,
+        "refresh_token": None
+    }
+
+
+def generate_random_token(length: int = 32) -> str:
+    """
+    Генерирует случайную строку для использования в качестве токена.
+    """
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
 
 @pytest.mark.asyncio
@@ -17,15 +30,14 @@ from starlette import status
     ]
 )
 async def test_registration(
-        self,
-        client,
+        async_client,
         username: str,
         password: str,
         age: int,
         exp_status_code: int,
         expected_response: dict
 ):
-    response = await client.post('/auth/register', json={
+    response = await async_client.post('/auth/register', json={
         "username": username,
         "password": password,
         "age": age
@@ -45,17 +57,17 @@ async def test_registration(
     ]
 )
 async def test_login_and_authorize(
-        self,
-        client,
+        async_client,
         username: str,
         password: str,
-        exp_status_code: int
+        exp_status_code: int,
+        token_storage: dict  # Pass the token storage fixture
 ):
-    response = await client.post('/auth/login',
-                                 json={
-                                     "username": username,
-                                     "password": password
-                                 })
+    response = await async_client.post('/auth/login',
+                                       json={
+                                           "username": username,
+                                           "password": password
+                                       })
     r_s_c = response.status_code
     assert r_s_c == exp_status_code, "Login Failed"
 
@@ -64,19 +76,56 @@ async def test_login_and_authorize(
     elif r_s_c == status.HTTP_403_FORBIDDEN:
         assert response.json() == {"detail": "Login or password is not valid"}
 
-    access_token = response.cookies.get('access_token')
-    refresh_token = response.cookies.get('refresh_token')
     if response.status_code == status.HTTP_200_OK:
-        assert access_token == response.json().get('access_token'), \
+        token_storage['access_token'] = response.cookies.get('access_token')
+        token_storage['refresh_token'] = response.cookies.get('refresh_token')
+        assert token_storage['access_token'] == response.json().get('access_token'), \
             "access_token не был установлен в куки!"
-        assert refresh_token, "refresh_token не установлен в куки!"
-        new_response = await client.get('/auth/authorize', cookies={
-            'access_token': access_token,
-            'refresh_token': refresh_token
-        })
+        assert token_storage['refresh_token'], "refresh_token не установлен в куки!"
+        async_client.cookies.set('access_token', token_storage['access_token'])
+        async_client.cookies.set('refresh_token', token_storage['refresh_token'])
+        new_response = await async_client.get('/auth/authorize')
         assert new_response.status_code == status.HTTP_200_OK
         assert new_response.json() == username
 
-#
-# async def test_update():
-#
+
+@pytest.mark.asyncio
+async def test_refresh(async_client, token_storage: dict):
+    m_access_token = token_storage['access_token']
+    m_refresh_token = token_storage['refresh_token']
+
+    async_client.cookies.set('access_token', m_access_token)
+    async_client.cookies.set('refresh_token',m_refresh_token)
+
+    response = await async_client.post("/auth/refresh")
+
+    assert response.status_code == status.HTTP_200_OK
+
+    assert response.cookies.get('access_token') != m_access_token, "access токен не обновлен!"
+    assert response.cookies.get('refresh_token') != m_refresh_token, "refresh токен не обновлен!"
+
+    token_storage['access_token'] = response.cookies.get('access_token')
+    token_storage['refresh_token'] = response.cookies.get('refresh_token')
+
+
+async def test_auto_refresh(async_client, token_storage: dict):
+    await asyncio.sleep(61)
+    async_client.cookies.set('access_token',  token_storage['access_token'])
+    async_client.cookies.set('refresh_token', token_storage['refresh_token'])
+    response = await async_client.get("/auth/authorize")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.cookies.get('access_token') != token_storage[
+        'access_token'], "Токен доступа не был обновлен!"
+    assert response.cookies.get('refresh_token') != token_storage[
+        'refresh_token'], "Рефреш токен не был обновлен!"
+
+    token_storage['access_token'] = response.cookies.get('access_token')
+    token_storage['refresh_token'] = response.cookies.get('refresh_token')
+
+    async_client.cookies.set('access_token',  '')
+    async_client.cookies.set('refresh_token', token_storage['refresh_token'])
+
+    response = await async_client.get("/auth/authorize")
+    assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    assert response.json() == {'detail': 'Invalid access token'}

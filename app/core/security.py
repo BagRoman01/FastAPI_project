@@ -116,9 +116,6 @@ def check_session(
     if session.fingerprint != fingerprint:
         raise InvalidRefreshTokenError
 
-    print(datetime.now(timezone.utc))
-    print(session.exp_at)
-    print(session.exp_at >= datetime.now(timezone.utc))
     if session.exp_at <= datetime.now(timezone.utc):
         raise RefreshTokenExpiredError
 
