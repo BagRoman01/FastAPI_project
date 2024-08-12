@@ -1,0 +1,19 @@
+version: "3.7"
+services:
+  db:
+    image: postgres:15
+    container_name: db_app
+    env_file:
+      - .env_none_dev
+
+  app:
+    build:
+      context: .
+    env_file:
+      - .env_none_dev
+    container_name: my_app
+    command: ["/my_app/docker_cmds/app.sh"]
+    ports:
+      - "8080:8000"
+    depends_on:
+      - db

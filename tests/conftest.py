@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from typing import AsyncGenerator
 from app.database.db import Base
 from app.core.config import settings
-from main import app
+from app.main import app
 import httpx
 
 engine_test = create_async_engine(settings.ASYNC_DATABASE_URL, poolclass=NullPool)
