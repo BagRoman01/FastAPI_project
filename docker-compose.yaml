@@ -1,7 +1,8 @@
 version: "3.8"
 services:
   db:
-    image: postgres:15
+    image: bagroman/fastapi_repo:15
+#    image: postgres:15
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
@@ -13,8 +14,9 @@ services:
       - .env_none_dev
 
   app:
-    build:
-      context: .
+    image: bagroman/fastapi_repo:latest
+#    build:
+#      context: .
     env_file:
       - .env_none_dev
     container_name: my_app
