@@ -1,6 +1,4 @@
 import asyncio
-import string
-import random
 import pytest
 from starlette import status
 
@@ -11,13 +9,6 @@ def token_storage():
         "access_token": None,
         "refresh_token": None
     }
-
-
-def generate_random_token(length: int = 32) -> str:
-    """
-    Генерирует случайную строку для использования в качестве токена.
-    """
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
 
 @pytest.mark.asyncio
@@ -95,7 +86,7 @@ async def test_refresh(async_client, token_storage: dict):
     m_refresh_token = token_storage['refresh_token']
 
     async_client.cookies.set('access_token', m_access_token)
-    async_client.cookies.set('refresh_token',m_refresh_token)
+    async_client.cookies.set('refresh_token', m_refresh_token)
 
     response = await async_client.post("/auth/refresh")
 

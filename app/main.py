@@ -6,6 +6,8 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 import uvicorn
 from contextlib import asynccontextmanager
+from starlette.middleware.cors import CORSMiddleware
+from app.core.config import settings
 
 
 @asynccontextmanager
@@ -16,9 +18,6 @@ async def lifespan(this_app: FastAPI):
     print(f"Connected to Redis: {pong}")
     cache_backend = FastAPICache.get_backend()
     print(f"Cache Backend Initialized: {cache_backend}")
-    # Check cache keys
-    all_keys = await redis.keys('*')
-    print(f"Current Redis Keys: {all_keys}")
 
     yield
 
@@ -31,7 +30,15 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(auth)
 app.include_router(currency)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='127.0.0.1', port=8080)
+    uvicorn.run(app, host=settings.HOST, port=settings.PORT)
 
