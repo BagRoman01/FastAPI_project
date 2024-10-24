@@ -21,7 +21,7 @@ class RegistrationError(HTTPException):
 
 
 class ShortPasswordError(ValueError):
-    def __init__(self, detail: str = "Password must be at least 8 characters long."):
+    def __init__(self, detail: str = "Password must be at least 6 characters long."):
         super().__init__(detail)
 
 

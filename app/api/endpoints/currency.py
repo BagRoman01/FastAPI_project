@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Depends
 from app.api.dependencies import currency_service_dep
 from app.api.endpoints.authentication import authorize
@@ -5,6 +6,8 @@ from app.api.schemas.currency import ExchangeCurrency, HistoryExchangeCurrency
 from fastapi_cache.decorator import cache
 
 currency = APIRouter(prefix='/currency', tags=['currency'])
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 @currency.get('/currencies')
@@ -14,6 +17,7 @@ async def get_currencies(
         user: str = Depends(authorize),
         currencies: str = None
 ):
+    logger.info('Вывожу валюты.....')
     print('Вывожу валюты.....')
     return await cur_service.get_currencies(currencies)
 

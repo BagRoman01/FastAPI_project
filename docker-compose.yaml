@@ -1,8 +1,7 @@
 version: "3.8"
 services:
   db:
-    image: bagroman/fastapi_repo:15
-#    image: postgres:15
+    image: postgres:15
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
@@ -13,16 +12,28 @@ services:
     env_file:
       - .env_none_dev
 
+  redis:
+    image: redis:7
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 5s
+    container_name: redis_app
+    env_file:
+      - .env_none_dev
+
   app:
-    image: bagroman/fastapi_repo:latest
-#    build:
-#      context: .
+    build:
+      context: .
+#    image: bagroman/fastapi_repo:latest
     env_file:
       - .env_none_dev
     container_name: my_app
     command: ["/my_app/docker_cmds/app.sh"]
     ports:
-      - "8080:8000"
+      - "${PORT}:8000"
     depends_on:
       db:
         condition: service_healthy

@@ -1,9 +1,10 @@
+from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from app.exceptions.auth_exceptions import ShortPasswordError
 
 
 class UserCreate(BaseModel):
-    age: int = Field(..., gt=0, le=120, description="Age must be between 1 and 120")
+    age: Optional[int] = Field(None, gt=0, le=120, description="Age must be between 1 and 120")
     username: str
     password: str
 

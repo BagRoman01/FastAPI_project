@@ -88,8 +88,20 @@ def set_tokens_to_cookies(
         response: Response,
         tokens: Tokens
 ):
-    response.set_cookie('access_token', tokens.access_token, httponly=True)
-    response.set_cookie('refresh_token', tokens.refresh_token, httponly=True)
+    response.set_cookie(
+        'access_token',
+        tokens.access_token,
+        httponly=True,
+        secure=True,
+        samesite='strict'
+    )
+    response.set_cookie(
+        'refresh_token',
+        tokens.refresh_token,
+        httponly=True,
+        secure=True,
+        samesite='strict'
+    )
     return response
 
 
