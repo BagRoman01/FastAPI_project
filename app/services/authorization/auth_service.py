@@ -1,12 +1,15 @@
 from typing import Annotated
 from fastapi import Depends
+
 from app.api.schemas.tokens import Tokens
 from app.api.schemas.user import UserLogin, UserCreate
 from app.core.security import (
     verify_pwd,
     create_jwt_token,
     create_session,
-    set_tokens_to_cookies, check_session, get_current_user
+    set_refresh_token_to_cookie,
+    check_session,
+    get_current_user
 )
 from app.exceptions.auth_exceptions import AuthenticationError
 from app.exceptions.token_exceptions import AccessTokenExpiredError
@@ -42,9 +45,8 @@ class AuthService:
         new_session = create_session(user_from_db, fingerprint)
         added_session = await self.session_service.add_session(new_session)
 
-        set_tokens_to_cookies(response, Tokens(access_token=access_token,
-                                               refresh_token=added_session.refresh_token))
-        return {'access_token': access_token}
+        set_refresh_token_to_cookie(response=response, refresh_token=added_session.refresh_token)
+        return {"access_token": access_token, "token_type": "bearer"}
 
     async def refresh_tokens(
             self,
@@ -61,8 +63,7 @@ class AuthService:
         new_refresh_token = new_session.refresh_token
         await self.session_service.add_session(new_session)
 
-        set_tokens_to_cookies(response, Tokens(access_token=new_access_token,
-                                               refresh_token=new_refresh_token))
+        set_refresh_token_to_cookie(refresh_token=new_refresh_token, response=response)
         return Tokens(access_token=new_access_token, refresh_token=new_refresh_token)
 
     async def authorize(
@@ -74,6 +75,7 @@ class AuthService:
         try:
             current_user: str = get_current_user(tokens.access_token)
         except AccessTokenExpiredError:
+            print('ТОкен истек!')
             new_tokens = await self.refresh_tokens(response, tokens, fingerprint)
             current_user: str = get_current_user(new_tokens.access_token)
         return current_user

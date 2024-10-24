@@ -84,20 +84,13 @@ def get_current_user(token: str):
     return payload["username"]
 
 
-def set_tokens_to_cookies(
+def set_refresh_token_to_cookie(
         response: Response,
-        tokens: Tokens
+        refresh_token: str,
 ):
     response.set_cookie(
-        'access_token',
-        tokens.access_token,
-        httponly=True,
-        secure=True,
-        samesite='strict'
-    )
-    response.set_cookie(
         'refresh_token',
-        tokens.refresh_token,
+        refresh_token,
         httponly=True,
         secure=True,
         samesite='strict'
@@ -105,17 +98,45 @@ def set_tokens_to_cookies(
     return response
 
 
+# def set_tokens_to_cookies(
+#         response: Response,
+#         tokens: Tokens
+# ):
+#     response.set_cookie(
+#         'access_token',
+#         tokens.access_token,
+#         httponly=True,
+#         secure=True,
+#         samesite='strict'
+#     )
+#     response.set_cookie(
+#         'refresh_token',
+#         tokens.refresh_token,
+#         httponly=True,
+#         secure=True,
+#         samesite='strict'
+#     )
+#     return response
+
+
 def get_fingerprint(request: Request):
     return str(request.headers.get('user-agent'))
 
 
-def get_tokens_from_cookie(request: Request):
-    access_token = request.cookies.get('access_token')
+def get_refresh_token_from_cookie(request: Request):
     refresh_token = request.cookies.get('refresh_token')
     if refresh_token:
-        return Tokens(access_token=access_token, refresh_token=refresh_token)
-    else:
-        raise TokensNotFoundError
+        return refresh_token
+    raise TokensNotFoundError
+
+#
+# def get_tokens_from_cookie(request: Request):
+#     access_token = request.cookies.get('access_token')
+#     refresh_token = request.cookies.get('refresh_token')
+#     if refresh_token:
+#         return Tokens(access_token=access_token, refresh_token=refresh_token)
+#     else:
+#         raise TokensNotFoundError
 
 
 def check_session(
