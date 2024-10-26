@@ -11,11 +11,11 @@ from app.core.security import (
     check_session,
     get_current_user
 )
-from app.exceptions.auth_exceptions import AuthenticationError
+from app.exceptions.auth_exceptions import AuthenticationError, SessionNotFoundError
 from app.exceptions.token_exceptions import AccessTokenExpiredError
 from app.services.authorization.sessions_service import SessionsService
 from app.services.authorization.users_service import UsersService
-from fastapi import Response
+from fastapi import Response, Request
 from app.utils.uow import UnitOfWork, IUnitOfWork
 
 i_uow_dep = Annotated[IUnitOfWork, Depends(UnitOfWork)]
@@ -51,10 +51,10 @@ class AuthService:
     async def refresh_tokens(
             self,
             response: Response,
-            tokens: Tokens,
+            refresh_token: str,
             fingerprint: str
     ):
-        session = await self.session_service.get_session_by_refresh_token(tokens.refresh_token)
+        session = await self.session_service.get_session_by_refresh_token(refresh_token)
         user_id = check_session(session, fingerprint)
         user = await self.user_service.get_user_from_db(user_id)
         new_access_token = create_jwt_token(user.model_dump())
@@ -64,7 +64,7 @@ class AuthService:
         await self.session_service.add_session(new_session)
 
         set_refresh_token_to_cookie(refresh_token=new_refresh_token, response=response)
-        return Tokens(access_token=new_access_token, refresh_token=new_refresh_token)
+        return {"access_token": new_access_token, "token_type": "bearer"}
 
     async def authorize(
             self,
@@ -75,8 +75,21 @@ class AuthService:
         try:
             current_user: str = get_current_user(tokens.access_token)
         except AccessTokenExpiredError:
-            print('ТОкен истек!')
             new_tokens = await self.refresh_tokens(response, tokens, fingerprint)
-            current_user: str = get_current_user(new_tokens.access_token)
+            current_user: str = get_current_user(new_tokens["access_token"])
         return current_user
 
+    async def logout(
+            self,
+            response: Response,
+            request: Request,
+            fingerprint: str
+    ):
+
+        refresh_token = request.cookies.get('refresh_token')
+        result = await self.session_service.delete_session_by_refresh_token_and_fingerprint(
+            refresh_token,
+            fingerprint
+        )
+        response.delete_cookie('refresh_token')
+        return result

@@ -41,3 +41,12 @@ class AuthenticationError(HTTPException):
             status_code: int = status.HTTP_403_FORBIDDEN
     ):
         super().__init__(status_code=status_code, detail=detail)
+
+
+class SessionNotFoundError(HTTPException):
+    def __init__(
+            self,
+            detail: str = "Session not found!",
+            status_code: int = status.HTTP_404_NOT_FOUND
+    ):
+        super().__init__(status_code=status_code, detail=detail)

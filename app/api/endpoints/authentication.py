@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Response, Request
 from app.api.schemas.user import UserCreate, UserLogin
 from app.api.dependencies import (
     auth_service_dep,
     fingerprint_dep,
-    tokens_dep
+    tokens_dep,
+    refresh_dep
 )
 
 auth = APIRouter(prefix="/auth")
@@ -24,6 +25,8 @@ async def login_user(
         response: Response,
         fingerprint: fingerprint_dep
 ):
+    print(user.username)
+    print(user.password)
     return await service_auth.authenticate_user(
         user,
         response=response,
@@ -31,16 +34,17 @@ async def login_user(
     )
 
 
-@auth.post('/refresh')
+@auth.get('/refresh')
 async def refresh_tokens(
         response: Response,
-        tokens: tokens_dep,
+        refresh_token: refresh_dep,
         fingerprint: fingerprint_dep,
         service_auth: auth_service_dep,
 ):
+    print(refresh_token)
     return await service_auth.refresh_tokens(
         response,
-        tokens,
+        refresh_token,
         fingerprint
     )
 
@@ -58,3 +62,16 @@ async def authorize(
         fingerprint
     )
 
+
+@auth.post("/logout")
+async def logout(
+    service_auth: auth_service_dep,
+    response: Response,
+    request: Request,
+    fingerprint: fingerprint_dep
+):
+    return await service_auth.logout(
+        response,
+        request,
+        fingerprint
+    )

@@ -10,8 +10,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 
-@currency.get('/currencies')
-@cache(expire=20)
+@currency.get('/all')
 async def get_currencies(
         cur_service: currency_service_dep,
         user: str = Depends(authorize),

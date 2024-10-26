@@ -34,3 +34,14 @@ class SessionsService:
     async def delete_session(self, session_id: int):
         async with self.uow:
             return await self.uow.session_repos.delete_by_id(session_id)
+
+    async def delete_session_by_refresh_token_and_fingerprint(
+            self,
+            refresh_token: str,
+            fingerprint: str):
+        async with self.uow:
+            await self.uow.session_repos.delete_session_by_refresh_token_and_fingerprint(
+                refresh_token=refresh_token,
+                fingerprint=fingerprint
+            )
+            await self.uow.commit()

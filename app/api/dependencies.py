@@ -10,13 +10,21 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 def getTokens(request: Request, access_token: str = Depends(oauth2_scheme)) -> Tokens:
-    refresh_token = request.cookies.get('refresh_token')
+    print('gettting tokens')
+    refresh_token = getRefresh(request)
+    print(refresh_token)
     return Tokens(access_token=access_token, refresh_token=refresh_token)
+
+
+def getRefresh(request: Request):
+    print('getRefresh')
+    return request.cookies.get('refresh_token')
 
 
 fingerprint_dep = Annotated[str, Depends(get_fingerprint)]
 auth_service_dep = Annotated[AuthService, Depends(AuthService)]
 tokens_dep = Annotated[Tokens, Depends(getTokens)]
+refresh_dep = Annotated[str, Depends(getRefresh)]
 access_token_dep = Annotated[str, Depends(oauth2_scheme)]
 currency_service_dep = Annotated[CurrencyService, Depends(CurrencyService)]
 

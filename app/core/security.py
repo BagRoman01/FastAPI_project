@@ -89,34 +89,11 @@ def set_refresh_token_to_cookie(
         refresh_token: str,
 ):
     response.set_cookie(
-        'refresh_token',
-        refresh_token,
+        key='refresh_token',
+        value=refresh_token,
         httponly=True,
-        secure=True,
-        samesite='strict'
+        secure=True
     )
-    return response
-
-
-# def set_tokens_to_cookies(
-#         response: Response,
-#         tokens: Tokens
-# ):
-#     response.set_cookie(
-#         'access_token',
-#         tokens.access_token,
-#         httponly=True,
-#         secure=True,
-#         samesite='strict'
-#     )
-#     response.set_cookie(
-#         'refresh_token',
-#         tokens.refresh_token,
-#         httponly=True,
-#         secure=True,
-#         samesite='strict'
-#     )
-#     return response
 
 
 def get_fingerprint(request: Request):
