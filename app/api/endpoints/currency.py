@@ -16,8 +16,6 @@ async def get_currencies(
         user: str = Depends(authorize),
         currencies: str = None
 ):
-    logger.info('Вывожу валюты.....')
-    print('Вывожу валюты.....')
     return await cur_service.get_currencies(currencies)
 
 

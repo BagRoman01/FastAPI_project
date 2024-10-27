@@ -10,14 +10,11 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 def getTokens(request: Request, access_token: str = Depends(oauth2_scheme)) -> Tokens:
-    print('gettting tokens')
     refresh_token = getRefresh(request)
-    print(refresh_token)
     return Tokens(access_token=access_token, refresh_token=refresh_token)
 
 
 def getRefresh(request: Request):
-    print('getRefresh')
     return request.cookies.get('refresh_token')
 
 

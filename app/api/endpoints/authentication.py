@@ -6,6 +6,7 @@ from app.api.dependencies import (
     tokens_dep,
     refresh_dep
 )
+from services.authorization.auth_service import AuthService
 
 auth = APIRouter(prefix="/auth")
 
@@ -25,8 +26,6 @@ async def login_user(
         response: Response,
         fingerprint: fingerprint_dep
 ):
-    print(user.username)
-    print(user.password)
     return await service_auth.authenticate_user(
         user,
         response=response,
@@ -41,7 +40,7 @@ async def refresh_tokens(
         fingerprint: fingerprint_dep,
         service_auth: auth_service_dep,
 ):
-    print(refresh_token)
+    print('refreshim токены!')
     return await service_auth.refresh_tokens(
         response,
         refresh_token,
@@ -51,16 +50,10 @@ async def refresh_tokens(
 
 @auth.get("/authorize")
 async def authorize(
-        service_auth: auth_service_dep,
-        response: Response,
-        fingerprint: fingerprint_dep,
         tokens: tokens_dep
 ):
-    return await service_auth.authorize(
-        response,
-        tokens,
-        fingerprint
-    )
+    print('проверка авторизации')
+    return await AuthService.authorize(tokens)
 
 
 @auth.post("/logout")

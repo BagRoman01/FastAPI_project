@@ -1,3 +1,4 @@
+from http.client import HTTPException
 from typing import Annotated
 from fastapi import Depends
 
@@ -66,17 +67,15 @@ class AuthService:
         set_refresh_token_to_cookie(refresh_token=new_refresh_token, response=response)
         return {"access_token": new_access_token, "token_type": "bearer"}
 
+    @staticmethod
     async def authorize(
-            self,
-            response: Response,
-            tokens: Tokens,
-            fingerprint: str
+            tokens: Tokens
     ):
         try:
             current_user: str = get_current_user(tokens.access_token)
-        except AccessTokenExpiredError:
-            new_tokens = await self.refresh_tokens(response, tokens, fingerprint)
-            current_user: str = get_current_user(new_tokens["access_token"])
+        except HTTPException as e:
+            raise e
+
         return current_user
 
     async def logout(
