@@ -20,6 +20,15 @@ class InvalidRefreshTokenError(HTTPException):
         super().__init__(status_code=status_code, detail=detail)
 
 
+class NoFingerprintMatchError(HTTPException):
+    def __init__(
+            self,
+            detail: str = "Fingerprints don't match!",
+            status_code: int = status.HTTP_401_UNAUTHORIZED
+    ):
+        super().__init__(status_code=status_code, detail=detail)
+
+
 class NoInfoAccessTokenError(HTTPException):
     def __init__(
             self,
@@ -47,13 +56,23 @@ class RefreshTokenExpiredError(HTTPException):
         super().__init__(status_code=status_code, detail=detail)
 
 
-class TokensNotFoundError(HTTPException):
+class AccessTokenNotFoundError(HTTPException):
     def __init__(
             self,
-            detail: str = "Tokens have not been found!",
+            detail: str = "Access token has not been found!",
+            status_code: int = status.HTTP_401_UNAUTHORIZED
+    ):
+        super().__init__(status_code=status_code, detail=detail)
+
+
+class RefreshTokenNotFoundError(HTTPException):
+    def __init__(
+            self,
+            detail: str = "Refresh token has not been found!",
             status_code: int = status.HTTP_404_NOT_FOUND
     ):
         super().__init__(status_code=status_code, detail=detail)
+
 
 
 

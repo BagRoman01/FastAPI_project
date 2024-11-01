@@ -106,15 +106,6 @@ def get_refresh_token_from_cookie(request: Request):
         return refresh_token
     raise TokensNotFoundError
 
-#
-# def get_tokens_from_cookie(request: Request):
-#     access_token = request.cookies.get('access_token')
-#     refresh_token = request.cookies.get('refresh_token')
-#     if refresh_token:
-#         return Tokens(access_token=access_token, refresh_token=refresh_token)
-#     else:
-#         raise TokensNotFoundError
-
 
 def check_session(
         session: Session,

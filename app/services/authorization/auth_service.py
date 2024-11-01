@@ -12,7 +12,7 @@ from app.core.security import (
     check_session,
     get_current_user
 )
-from app.exceptions.auth_exceptions import AuthenticationError, SessionNotFoundError
+from app.exceptions.auth_exceptions import AuthenticationError
 from app.exceptions.token_exceptions import AccessTokenExpiredError
 from app.services.authorization.sessions_service import SessionsService
 from app.services.authorization.users_service import UsersService

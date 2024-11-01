@@ -11,15 +11,6 @@ class UserAlreadyExistsError(HTTPException):
         super().__init__(status_code=status_code, detail=f"User with username '{username}' already exists.")
 
 
-class RegistrationError(HTTPException):
-    def __init__(
-            self,
-            detail: str = "Registration failed. Please try again.",
-            status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR
-    ):
-        super().__init__(status_code=status_code, detail=detail)
-
-
 class ShortPasswordError(ValueError):
     def __init__(self, detail: str = "Password must be at least 6 characters long."):
         super().__init__(detail)
@@ -38,15 +29,6 @@ class AuthenticationError(HTTPException):
     def __init__(
             self,
             detail: str = "Login or password is not valid",
-            status_code: int = status.HTTP_403_FORBIDDEN
-    ):
-        super().__init__(status_code=status_code, detail=detail)
-
-
-class SessionNotFoundError(HTTPException):
-    def __init__(
-            self,
-            detail: str = "Session not found!",
-            status_code: int = status.HTTP_404_NOT_FOUND
+            status_code: int = status.HTTP_400_BAD_REQUEST
     ):
         super().__init__(status_code=status_code, detail=detail)
